@@ -1,0 +1,37 @@
+Services：
+    可以注入
+
+Middleware：
+    In ASP.NET Core you compose your request pipeline using Middleware.
+    Middleware is software that is assembled into an application pipeline to handle requests and responses
+
+    Each component chooses whether to pass the request on to the next component in the pipeline, 
+        and can perform certain actions before and after the next component is invoked in the pipeline. 
+        Request delegates are used to build the request pipeline. The request delegates handle each HTTP request
+
+    表现形式：
+        1、动态方法（called in-line middleware）
+        2、定义在一个可重用的类中
+     A delegate can also decide to not pass a request to the next delegate, which is called short-circuiting the request pipeline. 
+        Short-circuiting is often desirable because it allows unnecessary work to be avoided；
+        Exception-handling delegates need to be called early in the pipeline, so they can catch exceptions that occur in later stages of the pipeline
+    Changes to HttpResponse after the response has started will throw an exception. 
+        For example, changes such as setting headers, status code, etc, will throw an exception
+        HttpResponse.HasStarted is a useful hint to indicate if headers have been sent and/or the body has been written to.
+    内置中间件：
+        Authentication
+        CORS
+        Response Caching
+        Routing
+        Session
+        Static Files
+        URL Rewriting Middleware
+Servers：
+    ASP.NET Core 宿主不直接监听请求，而是依赖于一个HTTP服务器实现将请求映射到web应用
+    Kestrel 
+
+Configuration：
+    ASP.NET Core uses a new configuration model for handling simple name-value pairs,
+    it pulls from an ordered set of configuration providers;
+    The built-in configuration providers support a variety of file formats (XML, JSON, INI) 
+    and environment variables to enable environment-based configuration
