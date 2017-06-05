@@ -25,6 +25,13 @@ Middleware：
         Routing
         Session
         Static Files
+            静态文件认证：
+                ①将静态文件存放在wwwroot之外
+                ②通过controller的action返回FileResult的方式添加认证
+            ASP.NET Core applications hosted in IIS use the ASP.NET Core Module to forward all requests to the application including requests for static files. 
+                The IIS static file handler is not used because it doesn't get a chance to handle requests before they are handled by the ASP.NET Core Module
+            If the IIS static file handler is enabled and the ASP.NET Core Module (ANCM) is not correctly configured (for example if web.config was not deployed), 
+                static files will be served.
         URL Rewriting Middleware
 Servers：
     ASP.NET Core 宿主不直接监听请求，而是依赖于一个HTTP服务器实现将请求映射到web应用

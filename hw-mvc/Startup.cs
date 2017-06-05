@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using Middleware;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace hw_mvc
 {
@@ -45,71 +47,98 @@ namespace hw_mvc
         {
             // Add framework services.
             services.AddMvc();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // 必须
         //启动顺序——2
-        // public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-        // {
-        //     loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-        //     loggerFactory.AddDebug();
-
-        //     //Each Use extension method adds a middleware component to the request pipeline
-        //     //异常处理中间件首先注册，这样就可以获取后续调用引发的所有异常
-        //     if (env.IsDevelopment())
-        //     {
-        //         app.UseDeveloperExceptionPage();
-        //         app.UseBrowserLink();
-        //     }
-        //     else
-        //     {
-        //         app.UseExceptionHandler("/Home/Error");
-        //     }
-
-        //     //启用静态文件路由
-        //     //该管道注册顺序比较靠前，可以及早处理静态文件从而切断后续处理管道
-        //     app.UseStaticFiles();
-
-        //     //Identity does not short-circuit unauthenticated requests. 
-        //     //Although Identity authenticates requests, authorization (and rejection) occurs only 
-        //     //after MVC selects a specific controller and action.
-        //     app.UseIdentity();
-
-        //     app.UseMvc(routes =>
-        //     {
-        //         routes.MapRoute(
-        //             name: "default",
-        //             template: "{controller=Home}/{action=Index}/{id?}");
-        //     });
-        // }
-
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.UseRequestCulture();//自定义中间件
-            //Map* extensions are used as a convention for branching the pipeline
-            app.Map("/map1", HandleMapTest1);
-            app.Map("/map2", HandleMapTest2);
-            //条件映射
-            app.MapWhen(context => context.Request.Query.ContainsKey("branch"), HandleBranch);
-            app.MapWhen(context=>context.Request.Query.ContainsKey("culture"),HandleBranchCulture);
-            //嵌套映射
-            // app.Map("/level1", level1App => {
-            //         level1App.Map("/level2a", level2AApp => {
-            //             // "/level1/level2a"
-            //             //...
-            //         });
-            //         level1App.Map("/level2b", level2BApp => {
-            //             // "/level1/level2b"
-            //             //...
-            //         });
-            //     });
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
 
-            app.Run(async context =>
+            //Each Use extension method adds a middleware component to the request pipeline
+            //异常处理中间件首先注册，这样就可以获取后续调用引发的所有异常
+            if (env.IsDevelopment())
             {
-                await context.Response.WriteAsync("Hello from non-Map delegate. <p>");
+                app.UseDeveloperExceptionPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
+            //启用默认文件
+            //必须在UseStaticFiles之前，不具有UseStaticFiles的功能
+            app.UseDefaultFiles(new DefaultFilesOptions
+            {
+                //自定义默认文件名称
+                DefaultFileNames = new List<string> { "login.html", "idx.html" }
+            });
+
+            //启用静态文件路由
+            //该管道注册顺序比较靠前，可以及早处理静态文件从而切断后续处理管道
+            app.UseStaticFiles(); //makes the files in web root (wwwroot by default) servable
+                                  //it is required to serve the CSS, images and JavaScript in the wwwroot folder
+            app.UseStaticFiles(new StaticFileOptions //显式指定静态文件物理路径和虚拟路径（相对）
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"MyStaticFiles")),
+                //路径大小写问题：windows不区分，mac、linux区分大小写
+                RequestPath = new PathString("/staticfiles"),
+                OnPrepareResponse = ctx =>
+                {
+                    //设置缓存1分钟
+                    ctx.Context.Response.Headers.Add("Cache-Control", "public,max-age=60");
+                }
+            });
+            //启用文件浏览
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"MyStaticFiles")),
+                RequestPath = new PathString("/staticfiles")
+            });
+
+            //Identity does not short-circuit unauthenticated requests. 
+            //Although Identity authenticates requests, authorization (and rejection) occurs only 
+            //after MVC selects a specific controller and action.
+            // app.UseIdentity();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
+        // public void Configure(IApplicationBuilder app)
+        // {
+        //     app.UseRequestCulture();//自定义中间件
+        //     //Map* extensions are used as a convention for branching the pipeline
+        //     app.Map("/map1", HandleMapTest1);
+        //     app.Map("/map2", HandleMapTest2);
+        //     //条件映射
+        //     app.MapWhen(context => context.Request.Query.ContainsKey("branch"), HandleBranch);
+        //     app.MapWhen(context=>context.Request.Query.ContainsKey("culture"),HandleBranchCulture);
+        //     //嵌套映射
+        //     // app.Map("/level1", level1App => {
+        //     //         level1App.Map("/level2a", level2AApp => {
+        //     //             // "/level1/level2a"
+        //     //             //...
+        //     //         });
+        //     //         level1App.Map("/level2b", level2BApp => {
+        //     //             // "/level1/level2b"
+        //     //             //...
+        //     //         });
+        //     //     });
+
+        //     app.Run(async context =>
+        //     {
+        //         await context.Response.WriteAsync("Hello from non-Map delegate. <p>");
+        //     });
+        // }
 
         private static void HandleMapTest1(IApplicationBuilder app)
         {
