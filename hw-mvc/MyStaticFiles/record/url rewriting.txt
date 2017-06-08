@@ -1,0 +1,45 @@
+URL rewriting creates an abstraction between resource locations and their addresses so that the locations and addresses are not tightly linked
+Scenarios：
+    Moving or replacing server resources temporarily or permanently while maintaining stable locators for those resources
+    Splitting request processing across different applications or across areas of one application
+    Removing, adding, or reorganizing URL segments on incoming requests
+    Optimizing public URLs for Search Engine Optimization (SEO)c
+    Permitting the use of friendly public URLs to help people predict the content they will find by following a link
+    Redirecting insecure requests to secure endpoints
+    Preventing image hotlinking
+
+Ways：
+     Apache mod_rewrite module
+     IIS Rewrite Module
+     URL rewriting on Nginx
+     Your own method and class rule logic
+     URL Rewriting Middleware in ASP.NET Core applications
+
+URL rewriting can reduce the performance of an application. 
+    Where feasible, you should limit the number and complexity of rules.
+
+URL redirect：
+     client-side operation
+     This requires a round-trip to the server, and the redirect URL returned to the client 
+        will appear in the browser's address bar when the client makes a new request for the resource
+    When redirecting requests to a different URL, you will indicate whether the redirect is permanent or temporary
+        301 (Moved Permanently)： The client will cache the response when a 301 status code is received.
+        302 (Found)：client should not store and reuse the redirect URL in the future
+URL redirect：
+    server-side operation
+    It doesn't require a round-trip to the server.
+        The rewritten URL is not returned to the client and won't appear in a browser's address bar
+
+When to use URL Rewriting Middleware：
+    When you are unable to use the URL Rewrite module in IIS on Windows Server, 
+        the Apache mod_rewrite module on Apache Server, 
+        URL rewriting on Nginx, 
+        or your application is hosted on WebListener server.
+    The main reasons to use the server-based URL rewriting technologies in IIS, Apache, or Nginx are that 
+        the middleware doesn't support the full features of these modules 
+        and the performance of the middleware probably won't match that of the modules
+
+Package：
+    Microsoft.AspNetCore.Rewrite 
+
+TODO：Original Request: /redirect-rule/1234/5678

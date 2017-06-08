@@ -14,6 +14,7 @@ using System.Text;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace hw_mvc
 {
@@ -114,8 +115,10 @@ namespace hw_mvc
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
+            //自定义路由
             UseMyRoute(app);
+            //url重写
+            RewriteTest(app);
         }
 
         //使用自定义路由
@@ -145,7 +148,7 @@ namespace hw_mvc
             app.UseRouter(routes);
 
             //
-            URLGenerationTest(app,routes);
+            // URLGenerationTest(app,routes);
         }
 
         // public void Configure(IApplicationBuilder app)
@@ -224,6 +227,20 @@ namespace hw_mvc
                 await context.Response.WriteAsync("Menu<hr/>");
                 await context.Response.WriteAsync($"<a href='{path}'>Create Package 123</a><br/>");
             });
+        }
+
+        private static void RewriteTest(IApplicationBuilder app)
+        {
+            var options = new RewriteOptions()
+                .AddRedirect("redirect-rule/(.*)", "redirected/$1")
+                .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true);
+                // .AddApacheModRewrite(env.ContentRootFileProvider, "ApacheModRewrite.txt")
+                // .AddIISUrlRewrite(env.ContentRootFileProvider, "IISUrlRewrite.xml")
+                // .Add(RedirectXMLRequests)
+                // .Add(new RedirectImageRequests(".png", "/png-images"))
+                // .Add(new RedirectImageRequests(".jpg", "/jpg-images"));
+
+            app.UseRewriter(options);
         }
     }
 }

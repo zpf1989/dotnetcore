@@ -14,5 +14,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.2"/>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1"/>
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="1.1.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="1.0.2"/>
   </ItemGroup>
 </Project>
