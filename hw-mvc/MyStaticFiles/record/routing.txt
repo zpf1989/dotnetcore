@@ -1,0 +1,109 @@
+URL Matching：
+    Incoming requests enter the RouterMiddleware, which calls the RouteAsync method on each route in sequence. 
+    The IRouter instance chooses whether to handle the request by setting the RouteContext Handler to a non-null RequestDelegate
+
+
+    The primary input to RouteAsync is the RouteContext HttpContext associated with the current request. 
+    The RouteContext.Handler and RouteContext RouteData are outputs that will be set after a route matches
+        RouteData DataTokens is a property bag of additional data related to the matched route
+        These values are developer-defined and do not affect the behavior of routing in any way
+            values stashed in data tokens can be of any type
+
+URL generation:
+    It starts with user or framework code calling into the GetVirtualPath method of the route collection
+        VirtualPathContext HttpContext：
+                It is provided in case a route needs to get services or additional data associated with the current context
+        VirtualPathContext Values：
+                specify how to generate the desired URL for the current operation
+        VirtualPathContext AmbientValues：
+                produced from matching the current request with the routing system
+        VirtualPathData（return）：
+                VirtualPath
+                Router：a reference to the route that successfully generated the URL
+                DataTokens：This is the parallel of RouteData.DataTokens
+    MapRoute：
+        routes.MapRoute(
+            name: "default",
+            template: "{controller=Home}/{action=Index}/{id?}");//=Home，表示默认HomeController，?代表可选
+            //template: "{controller=Home}/{action=Index}/{id:int}");//指定数据类型（int）
+
+        routes.MapRoute(
+            name: "default_route",
+            template: "{controller}/{action}/{id?}",
+            defaults: new { controller = "Home", action = "Index" });
+
+        routes.MapRoute(
+            name: "us_english_products",
+            template: "en-US/Products/{id}",
+            defaults: new { controller = "Products", action = "Details" },
+            constraints: new { id = new IntRouteConstraint() },//约束
+            dataTokens: new { locale = "en-US" });//
+    URL generation:
+        UrlHelper（ASP.NET MVC ）
+
+
+Routing Middleware:
+    Microsoft.AspNetCore.Routing
+
+        MapRoute
+        MapGet
+        MapPost
+        MapPut
+        MapDelete
+        MapVerb
+    Routes must configured in the Configure method in the Startup class
+    If you are configuring a single route, call app.UseRouter passing in an IRouter instance. 
+        You won't need to call RouteBuilder
+
+Route Template Reference：
+    Text matching is case-insensitive
+    To match the literal route parameter delimiter { or }, escape it by repeating the character ({{ or }})
+     Using the template files/{filename}.{ext?}，
+        the following URLs would match this route:（because the trailing period . is optional）
+            /files/myFile.txt
+            /files/myFile.
+            /files/myFile
+    catch-all parameter:（can also match the empty string）
+        blog/{*slug} would match any URI that started with /blog and had any value following it 
+    Route parameters may also have constraints:
+        the route template blog/{article:minlength(10)} specifies the minlength constraint with the argument 10
+
+    Examples：
+    Route Template 	                        Example Matching URL 	Notes
+    hello 	                                /hello 	                Only matches the single path /hello
+    {Page=Home} 	                        / 	                    Matches and sets Page to Home
+    {Page=Home} 	                        /Contact 	            Matches and sets Page to Contact
+    {controller}/{action}/{id?} 	        /Products/List 	        Maps to Products controller and List action
+    {controller}/{action}/{id?} 	        /Products/Details/123 	Maps to Products controller and Details action. id set to 123
+    {controller=Home}/{action=Index}/{id?} 	/ 	                    Maps to Home controller and Index method; id is ignored.
+
+Route Constraint Reference：
+    Route constraints generally inspect the route value associated via the route template 
+        and make a simple yes/no decision about whether or not the value is acceptable
+    For example, the HttpMethodRouteConstraint can accept or reject a request based on its HTTP verb
+    
+    Warning
+        Avoid using constraints for input validation, 
+            because doing so means that invalid input will result in a 404 (Not Found) instead of a 400 with an appropriate error message. 
+            Route constraints should be used to disambiguate between similar routes, not to validate the inputs for a particular route.
+
+Regular expressions：
+    Expression 	                    Note
+    ^\d{3}-\d{2}-\d{4}$ 	        Regular expression
+    ^\\d{{3}}-\\d{{2}}-\\d{{4}}$ 	Escaped
+    ^[a-z]{2}$ 	                    Regular expression
+    ^[[a-z]]{{2}}$ 	                Escaped
+
+    start with the ^，end with the $（ensure that the regular expression match the entire route parameter value）
+        Expression 	String 	    Match 	Comment
+        [a-z]{2} 	hello 	    yes 	substring matches
+        [a-z]{2} 	123abc456 	yes 	substring matches
+        [a-z]{2} 	mz 	        yes 	matches expression
+        [a-z]{2} 	MZ 	        yes 	not case sensitive
+        ^[a-z]{2}$ 	hello 	    no 	    see ^ and $ above
+        ^[a-z]{2}$ 	123abc456 	no 	    see ^ and $ above
+        
+    {action:regex(^(list|get|create)$)} only matches the action route value to list, get, or create
+
+
+

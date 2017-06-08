@@ -13,6 +13,7 @@ using Middleware;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Microsoft.AspNetCore.Routing;
 
 namespace hw_mvc
 {
@@ -47,6 +48,8 @@ namespace hw_mvc
         {
             // Add framework services.
             services.AddMvc();
+
+            services.AddRouting();//添加路由中间件（Microsoft.AspNetCore.Routing）
 
         }
 
@@ -111,6 +114,38 @@ namespace hw_mvc
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            UseMyRoute(app);
+        }
+
+        //使用自定义路由
+        private void UseMyRoute(IApplicationBuilder app)
+        {
+            var trackPkgRouteHandler = new RouteHandler(context =>
+            {
+                var routeValues = context.GetRouteData().Values;
+                return context.Response.WriteAsync($"Hello! Route values:{string.Join(", ", routeValues)}");
+            });
+
+            var routeBuilder = new RouteBuilder(app, trackPkgRouteHandler);
+            //
+            routeBuilder.MapRoute(
+                    "Track Package Route",
+                    "package/{operation:regex(^(track|create|detonate)$)}/{id:int}"
+                );
+            //
+            routeBuilder.MapGet("hello/{name}", context =>
+            {
+                var values = context.GetRouteData().Values;
+                return context.Response.WriteAsync($"Hi, {values["name"]}!");
+            });
+
+            //build
+            var routes = routeBuilder.Build();
+            app.UseRouter(routes);
+
+            //
+            URLGenerationTest(app,routes);
         }
 
         // public void Configure(IApplicationBuilder app)
@@ -170,6 +205,24 @@ namespace hw_mvc
             app.Run(async context =>
             {
                 await context.Response.WriteAsync($"Hello {CultureInfo.CurrentCulture.DisplayName}");
+            });
+        }
+
+        private static void URLGenerationTest(IApplicationBuilder app,IRouter routes)
+        {
+            app.Run(async context =>
+            {
+                var dic = new RouteValueDictionary
+                {
+                    { "operation", "create" },
+                    { "id", 123}
+                };
+                var vpc = new VirtualPathContext(context,null,dic,"Track Package Route");
+                var path=routes.GetVirtualPath(vpc).VirtualPath;
+
+                context.Response.ContentType="text/html";
+                await context.Response.WriteAsync("Menu<hr/>");
+                await context.Response.WriteAsync($"<a href='{path}'>Create Package 123</a><br/>");
             });
         }
     }
