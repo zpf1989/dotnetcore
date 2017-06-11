@@ -15,6 +15,8 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Net.Http.Headers;
+using RewriteRules;
 
 namespace hw_mvc
 {
@@ -118,7 +120,7 @@ namespace hw_mvc
             //自定义路由
             UseMyRoute(app);
             //url重写
-            RewriteTest(app);
+            RewriteTest(app, env);
         }
 
         //使用自定义路由
@@ -211,7 +213,7 @@ namespace hw_mvc
             });
         }
 
-        private static void URLGenerationTest(IApplicationBuilder app,IRouter routes)
+        private static void URLGenerationTest(IApplicationBuilder app, IRouter routes)
         {
             app.Run(async context =>
             {
@@ -220,27 +222,49 @@ namespace hw_mvc
                     { "operation", "create" },
                     { "id", 123}
                 };
-                var vpc = new VirtualPathContext(context,null,dic,"Track Package Route");
-                var path=routes.GetVirtualPath(vpc).VirtualPath;
+                var vpc = new VirtualPathContext(context, null, dic, "Track Package Route");
+                var path = routes.GetVirtualPath(vpc).VirtualPath;
 
-                context.Response.ContentType="text/html";
+                context.Response.ContentType = "text/html";
                 await context.Response.WriteAsync("Menu<hr/>");
                 await context.Response.WriteAsync($"<a href='{path}'>Create Package 123</a><br/>");
             });
         }
 
-        private static void RewriteTest(IApplicationBuilder app)
+        private static void RewriteTest(IApplicationBuilder app, IHostingEnvironment env)
         {
             var options = new RewriteOptions()
-                .AddRedirect("redirect-rule/(.*)", "redirected/$1")
-                .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true);
-                // .AddApacheModRewrite(env.ContentRootFileProvider, "ApacheModRewrite.txt")
-                // .AddIISUrlRewrite(env.ContentRootFileProvider, "IISUrlRewrite.xml")
-                // .Add(RedirectXMLRequests)
-                // .Add(new RedirectImageRequests(".png", "/png-images"))
-                // .Add(new RedirectImageRequests(".jpg", "/jpg-images"));
+                .AddRedirect("redirect-rule/(.*)", "redirected/$1")//重定向，statuscode：defualt 302
+                .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true)//重写
+                .AddApacheModRewrite(env.ContentRootFileProvider, "/Rules/ApacheModRewrite.txt")
+                .AddIISUrlRewrite(env.ContentRootFileProvider, "/Rules/IISUrlRewrite.xml")
+                .Add(RedirectXMLRequests)
+                .Add(new RedirectImageRules(".png", "/png-images"))
+                .Add(new RedirectImageRules(".jpg", "/jpg-images"));
 
             app.UseRewriter(options);
+
+            app.Run(context =>
+                        context.Response.WriteAsync($"Rewritten or Redirected Url: {context.Request.Path + context.Request.QueryString}"));
+        }
+
+        static void RedirectXMLRequests(RewriteContext context)
+        {
+            var request = context.HttpContext.Request;
+
+            // Because we're redirecting back to the same app, stop processing if the request has already been redirected
+            if (request.Path.StartsWithSegments(new PathString("/xmlfiles")))
+            {
+                return;
+            }
+
+            if (request.Path.Value.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+            {
+                var response = context.HttpContext.Response;
+                response.StatusCode = StatusCodes.Status301MovedPermanently;
+                context.Result = RuleResult.EndResponse;
+                response.Headers[HeaderNames.Location] = "/xmlfiles" + request.Path + request.QueryString;
+            }
         }
     }
 }
