@@ -15,5 +15,7 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1"/>
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="1.1.2"/>
     <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="1.0.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.1.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Https" Version="1.1.2"/>
   </ItemGroup>
 </Project>

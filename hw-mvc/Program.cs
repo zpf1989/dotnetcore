@@ -12,7 +12,10 @@ namespace hw_mvc
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
-                .UseKestrel() //指定web服务
+                .UseKestrel(options =>//指定web服务
+                {
+                    // options.UseHttps("testCert.pfx", "testPassword");//证书未成功，自行申请？
+                }) 
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()// hosting in IIS and IIS Express
                 .UseStartup<Startup>()

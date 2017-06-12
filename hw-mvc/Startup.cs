@@ -240,7 +240,10 @@ namespace hw_mvc
                 .AddIISUrlRewrite(env.ContentRootFileProvider, "/Rules/IISUrlRewrite.xml")
                 .Add(RedirectXMLRequests)
                 .Add(new RedirectImageRules(".png", "/png-images"))
-                .Add(new RedirectImageRules(".jpg", "/jpg-images"));
+                .Add(new RedirectImageRules(".jpg", "/jpg-images"))
+                .AddRedirectToHttps(301,5001)//强制重定向为https，端口使用5001
+                // .AddRedirectToHttps()//使用https默认端口443
+                ;
 
             app.UseRewriter(options);
 
