@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<students> 
+  <student name="zpf"> 
+    <sex>男</sex>  
+    <age>28</age> 
+  </student> 
+</students>

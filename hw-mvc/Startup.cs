@@ -99,6 +99,16 @@ namespace hw_mvc
                     ctx.Context.Response.Headers.Add("Cache-Control", "public,max-age=60");
                 }
             });
+            app.UseStaticFiles(new StaticFileOptions 
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"xmlfiles")),
+                RequestPath = new PathString("/xmlfiles")
+            });
+            app.UseStaticFiles(new StaticFileOptions 
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"png-images")),
+                RequestPath = new PathString("/png-images")
+            });
             //启用文件浏览
             app.UseDirectoryBrowser(new DirectoryBrowserOptions
             {
@@ -235,17 +245,18 @@ namespace hw_mvc
         {
             var options = new RewriteOptions()
                 .AddRedirect("redirect-rule/(.*)", "redirected/$1")//重定向，statuscode：defualt 302
-                .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true)//重写
+                .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true)//重写，skipRemainingRules为true，则当前匹配时，忽略后续重写规则
                 .AddApacheModRewrite(env.ContentRootFileProvider, "/Rules/ApacheModRewrite.txt")
                 .AddIISUrlRewrite(env.ContentRootFileProvider, "/Rules/IISUrlRewrite.xml")
                 .Add(RedirectXMLRequests)
                 .Add(new RedirectImageRules(".png", "/png-images"))
                 .Add(new RedirectImageRules(".jpg", "/jpg-images"))
-                .AddRedirectToHttps(301,5001)//强制重定向为https，端口使用5001
+                // .AddRedirectToHttps(301,5001)//强制重定向为https，端口使用5001
                 // .AddRedirectToHttps()//使用https默认端口443
                 ;
 
             app.UseRewriter(options);
+            
 
             app.Run(context =>
                         context.Response.WriteAsync($"Rewritten or Redirected Url: {context.Request.Path + context.Request.QueryString}"));

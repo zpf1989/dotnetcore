@@ -42,4 +42,54 @@ When to use URL Rewriting Middleware：
 Package：
     Microsoft.AspNetCore.Rewrite 
 
-TODO：Original Request: /redirect-rule/1234/5678
+URL rewrite：
+    new RewriteOptions()
+    .AddRewrite(@"^rewrite-rule/(\d+)/(\d+)", "rewritten?var1=$1&var2=$2", skipRemainingRules: true)
+    //重写，skipRemainingRules为true，则当前匹配时，忽略后续重写规则
+    skipRemainingRules: true should be used whenever possible, 
+        because matching rules is an expensive process and slows down application response time.
+
+Apache mod_rewrite：
+    new RewriteOptions()
+    .AddApacheModRewrite(env.ContentRootFileProvider, "ApacheModRewrite.txt")//file must exists
+
+IIS URL Rewrite Module rules：
+    new RewriteOptions()
+    .AddIISUrlRewrite(env.ContentRootFileProvider, "IISUrlRewrite.xml")//file must exists
+    Don't point this at your web.config file, 
+        as these rules should be stored outside of your web.config to avoid conflicts with the IIS Rewrite module
+
+
+Method-based rule：
+    new RewriteOptions()
+    .Add(RedirectXMLRequests)
+    static void RedirectXMLRequests(RewriteContext context)
+    context：
+        HttpContext
+        Result：
+            RuleResult.ContinueRules（default）
+            RuleResult.EndResponse
+            RuleResult.SkipRemainingRules //Stop applying rules and send the context to the next middleware
+IRule-based rule：
+    Use Add(IRule) to implement your own rule logic in a class that derives from IRule
+    
+    new RewriteOptions()
+    .Add(new RedirectImageRequests(".png", "/png-images"))
+
+Regex examples：
+    Goal 	                            Regex String & Match Example 	Replacement String & Output Example
+    Rewrite path into querystring 	    ^path/(.*)/(.*)                 path?var1=$1&var2=$2
+                                        /path/abc/123 	                /path?var1=abc&var2=123
+    Strip trailing slash 	            (.*)/$                          $1
+                                        /path/ 	                        /path                
+    Enforce trailing slash 	            (.*[^/])$                       $1/
+                                        /path                           /path/	
+    Avoid rewriting specific requests 	(.*[^(\.axd)])$                 rewritten/$1
+                                        Yes: /resource.htm              /rewritten/resource.htm
+                                        No: /resource.axd 	            /resource.axd
+    Rearrange URL segments 	            path/(.*)/(.*)/(.*)             path/$3/$2/$1
+                                        path/1/2/3 	                    path/3/2/1
+    
+    Replace a URL segment 	            ^(.*)/segment2/(.*)             $1/replaced/$2
+                                        /segment1/segment2/segment3     /segment1/replaced/segment3 	
+    
