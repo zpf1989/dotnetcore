@@ -64,17 +64,26 @@ namespace hw_mvc
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            env.EnvironmentName = EnvironmentName.Production;
             //Each Use extension method adds a middleware component to the request pipeline
             //异常处理中间件首先注册，这样就可以获取后续调用引发的所有异常
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
+                // app.UseBrowserLink();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            //
+            app.UseStatusCodePages(async context =>
+            {
+                context.HttpContext.Response.ContentType="text/plain";
+                await context.HttpContext.Response.WriteAsync(
+                    "Status code page, status code: " + context.HttpContext.Response.StatusCode);
+            });
 
             //启用默认文件
             //必须在UseStaticFiles之前，不具有UseStaticFiles的功能
@@ -99,12 +108,12 @@ namespace hw_mvc
                     ctx.Context.Response.Headers.Add("Cache-Control", "public,max-age=60");
                 }
             });
-            app.UseStaticFiles(new StaticFileOptions 
+            app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"xmlfiles")),
                 RequestPath = new PathString("/xmlfiles")
             });
-            app.UseStaticFiles(new StaticFileOptions 
+            app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"png-images")),
                 RequestPath = new PathString("/png-images")
@@ -130,7 +139,7 @@ namespace hw_mvc
             //自定义路由
             UseMyRoute(app);
             //url重写
-            RewriteTest(app, env);
+            // RewriteTest(app, env);
         }
 
         //使用自定义路由
@@ -162,7 +171,7 @@ namespace hw_mvc
             //
             // URLGenerationTest(app,routes);
         }
-
+        #region
         // public void Configure(IApplicationBuilder app)
         // {
         //     app.UseRequestCulture();//自定义中间件
@@ -189,7 +198,7 @@ namespace hw_mvc
         //         await context.Response.WriteAsync("Hello from non-Map delegate. <p>");
         //     });
         // }
-
+        #endregion
         private static void HandleMapTest1(IApplicationBuilder app)
         {
             app.Run(async context =>
@@ -256,7 +265,7 @@ namespace hw_mvc
                 ;
 
             app.UseRewriter(options);
-            
+
 
             app.Run(context =>
                         context.Response.WriteAsync($"Rewritten or Redirected Url: {context.Request.Path + context.Request.QueryString}"));

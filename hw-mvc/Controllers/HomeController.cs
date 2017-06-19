@@ -15,6 +15,7 @@ namespace hw_mvc.Controllers
 
         public IActionResult About()
         {
+            throw new Exception("exception test");
             ViewData["Message"] = "Your application description page.";
 
             return View();

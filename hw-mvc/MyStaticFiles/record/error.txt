@@ -1,0 +1,26 @@
+Error Handling：
+    The developer exception page：
+        Microsoft.AspNetCore.Diagnostics
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        Enable the developer exception page only when the app is running in the Development environment. 
+            You don't want to share detailed exception information publicly when the app runs in production
+        
+        It's a good idea to configure an exception handler page to use when the app is not running in the Development environment
+    
+    In an MVC app, don't explicitly decorate the error handler action method with HTTP method attributes, 
+        such as HttpGet. Using explicit verbs could prevent some requests from reaching the method
+    
+    Server exception Handling：  
+         If the server catches an exception before the headers have been sent it sends a 500 Internal Server Error response with no body
+         Requests that are not handled by your app will be handled by the server, 
+            and any exception that occurs will be handled by the server's exception handling
+    
+    ASP.NET MVC error Handling： 
+        Exception Filters：
+            Exception filters are good for trapping exceptions that occur within MVC actions, 
+                but they're not as flexible as error handling middleware. 
+            Prefer middleware for the general case, 
+                and use filters only where you need to do error handling differently based on which MVC action was chosen
