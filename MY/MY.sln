@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MY.Stantard.Infrastructure", "MY.Stantard.Infrastructure\MY.Stantard.Infrastructure.csproj", "{A6C277E8-B161-4C63-BD08-E0611AF6AC99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DC.Infrastructure", "DC.Infrastructure\DC.Infrastructure.csproj", "{A6C277E8-B161-4C63-BD08-E0611AF6AC99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
