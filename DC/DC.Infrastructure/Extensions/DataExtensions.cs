@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 
-namespace MY.Stantard.Infrastructure.Extensions
+namespace DC.Infrastructure.Extensions
 {
     public static class DataExtensions
     {

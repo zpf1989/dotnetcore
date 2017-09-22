@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MY.Stantard.Infrastructure.Extensions
+namespace DC.Infrastructure.Extensions
 {
     public static class NumberExtensions
     {

@@ -1,5 +1,5 @@
 using System;
-namespace MY.Stantard.Infrastructure.Serialize
+namespace DC.Infrastructure.Serialize
 {
     public class BinarySerialize : ISerialize
     {

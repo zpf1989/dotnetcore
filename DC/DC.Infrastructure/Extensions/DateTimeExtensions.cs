@@ -1,5 +1,5 @@
 using System;
-namespace MY.Stantard.Infrastructure.Extensions
+namespace DC.Infrastructure.Extensions
 {
     public static class DateTimeExtensions
     {

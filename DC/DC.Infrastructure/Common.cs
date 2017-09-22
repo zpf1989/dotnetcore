@@ -1,5 +1,5 @@
 ﻿using System;
-namespace MY.Stantard.Infrastructure
+namespace DC.Infrastructure
 {
     public class Common
     {
