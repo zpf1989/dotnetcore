@@ -1,7 +1,7 @@
 using System;
 namespace DC.Infrastructure.Serialize
 {
-    public class ProtobufSerialize : ISerialize
+    public class JsonSerializer : ISerialize
     {
         public T Deserialize<T>(string str)
         {

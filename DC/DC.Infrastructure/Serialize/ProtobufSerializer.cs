@@ -1,7 +1,7 @@
 using System;
 namespace DC.Infrastructure.Serialize
 {
-    public class XmlSerialize : ISerialize
+    public class ProtobufSerializer : ISerialize
     {
         public T Deserialize<T>(string str)
         {
