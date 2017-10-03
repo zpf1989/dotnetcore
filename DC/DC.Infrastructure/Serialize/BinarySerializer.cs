@@ -1,14 +1,14 @@
 using System;
 namespace DC.Infrastructure.Serialize
 {
-    public class BinarySerializer : ISerialize
+    internal class BinarySerializer : ISerializer
     {
-        public T Deserialize<T>(string str)
+        T ISerializer.Deserialize<T>(string str)
         {
             throw new NotImplementedException();
         }
 
-        public string Serialize(object obj)
+        string ISerializer.Serialize(object obj)
         {
             throw new NotImplementedException();
         }
