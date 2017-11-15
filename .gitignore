@@ -8,3 +8,12 @@
 /hw-mvc/bin
 /DC/DC.Infrastructure/bin
 /DC/DC.Infrastructure/obj
+/DC/.vs
+/DC/.vscode
+/DC/packages
+/DC/DC.Infrastructure_Test/obj
+/DC/DC.Infrastructure_Test/bin
+/DC/DC.Log/obj
+/DC/DC.Log/bin
+/DC/DC.MongoDB/bin
+/DC/DC.MongoDB/obj
